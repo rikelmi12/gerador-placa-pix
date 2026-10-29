@@ -10,7 +10,9 @@ Formatos prontos para Folha A4 (Parede/Porta) e Totem de Balcão (A5), com temas
 [![Banco Central](https://img.shields.io/badge/PIX-Banco%20Central%20do%20Brasil-32BCAD.svg)](#)
 [![Print Ready](https://img.shields.io/badge/Print-A4%20%26%20A5-orange.svg)](#)
 
-[Demonstração Online](#-como-usar) • [Recursos](#-recursos-principais) • [Temas](#-temas-disponíveis) • [Padrão BACEN](#-especificação-técnica-pix)
+[![Live Demo](https://img.shields.io/badge/Demo-Acessar%20Online-32BCAD?style=for-the-badge&logo=google-chrome&logoColor=white)](https://rikelmi12.github.io/gerador-placa-pix/)
+
+[🚀 Acessar Demonstração Online](https://rikelmi12.github.io/gerador-placa-pix/) • [Recursos](#-recursos-principais) • [Temas](#-temas-disponíveis) • [Padrão BACEN](#-especificação-técnica-pix)
 
 </div>
 
