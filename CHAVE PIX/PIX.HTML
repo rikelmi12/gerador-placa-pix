@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Placa Pix Profissional | A4 e Balcão</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- QR Code Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- html2canvas for image export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: #131c2e;
+            --bg-input: #1b263b;
+            --border-color: #26354d;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary-accent: #32BCAD;
+            --primary-accent-hover: #299e91;
+            --btn-blue: #2563eb;
+            --btn-blue-hover: #1d4ed8;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Bar */
+        .app-header {
+            background: rgba(19, 28, 46, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-brand .pix-icon-badge {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #0f3d38, #32BCAD);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 14px rgba(50, 188, 173, 0.3);
+        }
+
+        .header-brand h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        .header-brand p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #32BCAD, #1ca091);
+            color: #042421;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(50, 188, 173, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3cd5c4, #22b4a4);
+            box-shadow: 0 6px 18px rgba(50, 188, 173, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #1e293b;
+            color: #f8fafc;
+            border-color: #334155;
+        }
+
+        .btn-secondary:hover {
+            background: #334155;
+            color: #ffffff;
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-print:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+
+        /* Main Workspace Layout */
+        .workspace-container {
+            display: flex;
+            flex: 1;
+            min-height: calc(100vh - 69px);
+        }
+
+        /* Sidebar Studio */
+        .studio-sidebar {
+            width: 460px;
+            min-width: 460px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(100vh - 69px);
+        }
+
+        .studio-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .studio-sidebar::-webkit-scrollbar-thumb {
+            background: #2a3a52;
+            border-radius: 4px;
+        }
+
+        /* Preview Canvas */
+        .canvas-area {
+            flex: 1;
+            background: radial-gradient(circle at 50% 20%, #152238 0%, #080d16 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 20px 60px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .canvas-controls-bar {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid #334155;
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+        }
+
+        .zoom-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .zoom-btn {
+            background: transparent;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .zoom-btn:hover,
+        .zoom-btn.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #ffffff;
+        }
+
+        /* Studio Sections */
+        .section-card {
+            background: rgba(11, 15, 25, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .section-card:hover {
+            border-color: #3b506e;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-title svg {
+            color: var(--primary-accent);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+
+        .char-counter {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid #2d3e58;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #ffffff;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(50, 188, 173, 0.2);
+            background: #202e47;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Key Type Selector Chips */
+        .type-chips {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .type-chip {
+            background: #1b263b;
+            border: 1px solid #2d3e58;
+            border-radius: 8px;
+            padding: 8px 6px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .type-chip:hover {
+            border-color: #4b6287;
+            background: #23324d;
+        }
+
+        .type-chip.active {
+            background: rgba(50, 188, 173, 0.15);
+            border-color: var(--primary-accent);
+            color: #3cd5c4;
+        }
+
+        /* Theme Selector Grid */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .theme-card {
+            background: #172133;
+            border: 2px solid #28374f;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .theme-card:hover {
+            border-color: #445b7e;
+            transform: translateY(-2px);
+        }
+
+        .theme-card.active {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+            background: #1c2940;
+        }
+
+        .theme-card-preview {
+            height: 32px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .theme-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .theme-desc {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Format Selector */
+        .format-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .format-btn {
+            background: #1b263b;
+            border: 1px solid #2d3e58;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .format-btn.active {
+            background: rgba(37, 99, 235, 0.18);
+            border-color: #3b82f6;
+            color: #60a5fa;
+        }
+
+        .format-btn span {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .format-btn small {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Logo Upload Box */
+        .logo-uploader {
+            border: 2px dashed #2d3e58;
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #151e2e;
+        }
+
+        .logo-uploader:hover {
+            border-color: var(--primary-accent);
+            background: #192437;
+        }
+
+        .logo-preview-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1c283d;
+            border: 1px solid #2d3e58;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 8px;
+        }
+
+        .logo-preview-box img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            border-radius: 6px;
+            background: white;
+            padding: 2px;
+        }
+
+        /* Options Checkboxes */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #cbd5e1;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-label input {
+            accent-color: var(--primary-accent);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* =========================================================
+           SHEET PREVIEW STYLES (A4 & DISPLAY)
+        ========================================================= */
+        .sheet-wrapper {
+            transition: transform 0.25s ease-out;
+            transform-origin: top center;
+        }
+
+        /* A4 Page Container */
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            height: 297mm;
+            background: #ffffff;
+            color: #0f172a;
+            padding: 14mm 16mm 14mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            box-sizing: border-box;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Display Balcão Form Factor */
+        .a4-page.format-display {
+            width: 148mm;
+            min-height: 210mm;
+            height: 210mm;
+            padding: 10mm 12mm 10mm;
+        }
+
+        /* Outer Frame Border */
+        .placa-frame {
+            position: absolute;
+            top: 7mm;
+            bottom: 7mm;
+            left: 7mm;
+            right: 7mm;
+            border: 3.5px solid var(--theme-border-color);
+            border-radius: 18px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .placa-frame::after {
+            content: '';
+            position: absolute;
+            top: 2.5mm;
+            bottom: 2.5mm;
+            left: 2.5mm;
+            right: 2.5mm;
+            border: 1px solid var(--theme-border-color);
+            border-radius: 13px;
+            opacity: 0.45;
+        }
+
+        /* Header of Plaque */
+        .placa-header {
+            position: relative;
+            z-index: 6;
+            text-align: center;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: var(--theme-header-bg);
+            color: #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .format-display .placa-header {
+            padding: 10px 14px;
+        }
+
+        /* Top Tag / Pill */
+        .placa-top-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .format-display .placa-top-pill {
+            font-size: 9px;
+            padding: 2px 8px;
+            margin-bottom: 4px;
+        }
+
+        /* Company Brand in Header */
+        .company-header-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 6px;
+            width: 100%;
+        }
+
+        .company-logo-img {
+            max-height: 52px;
+            max-width: 110px;
+            object-fit: contain;
+            background: #ffffff;
+            padding: 4px 8px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .format-display .company-logo-img {
+            max-height: 36px;
+            max-width: 80px;
+        }
+
+        .company-name-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            line-height: 1.15;
+            text-transform: uppercase;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            word-break: break-word;
+        }
+
+        .format-display .company-name-text {
+            font-size: 18px;
+        }
+
+        .company-slogan-text {
+            font-size: 13px;
+            opacity: 0.9;
+            font-weight: 500;
+            max-width: 90%;
+            letter-spacing: 0.2px;
+        }
+
+        .format-display .company-slogan-text {
+            font-size: 10px;
+        }
+
+        /* Pix Central Banner */
+        .pix-title-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 12px 0 8px;
+            z-index: 6;
+        }
+
+        .format-display .pix-title-banner {
+            margin: 6px 0 4px;
+            gap: 8px;
+        }
+
+        .pix-logo-svg {
+            width: 42px;
+            height: 42px;
+            color: var(--theme-primary);
+        }
+
+        .format-display .pix-logo-svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .pix-title-banner h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .format-display .pix-title-banner h2 {
+            font-size: 20px;
+        }
+
+        .pix-subtitle {
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 12px;
+            z-index: 6;
+        }
+
+        .format-display .pix-subtitle {
+            font-size: 10px;
+            margin-bottom: 6px;
+        }
+
+        /* QR Code Container Box */
+        .qr-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 6;
+            margin: 0 auto;
+        }
+
+        .qr-outer-card {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 24px;
+            border: 3.5px solid var(--theme-qr-border);
+            box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .format-display .qr-outer-card {
+            padding: 10px;
+            border-radius: 16px;
+            border-width: 2.5px;
+        }
+
+        /* Decorative Corners on QR Card */
+        .qr-outer-card::before,
+        .qr-outer-card::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-color: var(--theme-primary);
+            border-style: solid;
+        }
+
+        .qr-outer-card::before {
+            top: 6px;
+            left: 6px;
+            border-width: 3px 0 0 3px;
+            border-top-left-radius: 6px;
+        }
+
+        .qr-outer-card::after {
+            bottom: 6px;
+            right: 6px;
+            border-width: 0 3px 3px 0;
+            border-bottom-right-radius: 6px;
+        }
+
+        #qrcode-canvas-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qrcode-canvas-container img,
+        #qrcode-canvas-container canvas {
+            display: block;
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Pix Tag in QR Code bottom */
+        .qr-scan-badge {
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--theme-badge-bg);
+            color: var(--theme-badge-text);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .format-display .qr-scan-badge {
+            margin-top: 6px;
+            font-size: 9px;
+            padding: 2px 10px;
+        }
+
+        /* Key Box & Details */
+        .placa-details-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 12px 18px;
+            margin: 12px 0 8px;
+            text-align: center;
+            width: 100%;
+            z-index: 6;
+            position: relative;
+        }
+
+        .format-display .placa-details-card {
+            padding: 8px 12px;
+            margin: 6px 0 4px;
+            border-radius: 12px;
+        }
+
+        .key-type-badge {
+            display: inline-block;
+            background: var(--theme-primary);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            padding: 3px 12px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .format-display .key-type-badge {
+            font-size: 9px;
+            padding: 2px 8px;
+            margin-bottom: 3px;
+        }
+
+        .pix-key-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 19px;
+            font-weight: 700;
+            color: #0f172a;
+            word-break: break-all;
+            margin-bottom: 4px;
+            letter-spacing: -0.2px;
+        }
+
+        .format-display .pix-key-display {
+            font-size: 13px;
+        }
+
+        .recipient-info {
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            margin-top: 4px;
+        }
+
+        .format-display .recipient-info {
+            font-size: 11px;
+        }
+
+        .valor-info-badge {
+            display: inline-block;
+            margin-top: 6px;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 3px 12px;
+            border-radius: 8px;
+        }
+
+        .format-display .valor-info-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+        }
+
+        /* 3-Step Guide */
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+            margin: 8px 0;
+            z-index: 6;
+        }
+
+        .format-display .steps-container {
+            gap: 6px;
+            margin: 4px 0;
+        }
+
+        .step-item {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 8px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .format-display .step-item {
+            padding: 5px 6px;
+            border-radius: 8px;
+        }
+
+        .step-number {
+            width: 22px;
+            height: 22px;
+            background: var(--theme-primary);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+
+        .format-display .step-number {
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+            margin-bottom: 2px;
+        }
+
+        .step-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: #334155;
+            line-height: 1.25;
+        }
+
+        .format-display .step-text {
+            font-size: 8.5px;
+        }
+
+        /* Plaque Footer */
+        .placa-footer {
+            z-index: 6;
+            text-align: center;
+            padding-top: 6px;
+            border-top: 1px dashed #cbd5e1;
+        }
+
+        .footer-courtesy-msg {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .format-display .footer-courtesy-msg {
+            font-size: 11px;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .format-display .security-badge {
+            font-size: 8px;
+        }
+
+        /* =========================================================
+           THEME DEFINITIONS
+        ========================================================= */
+        /* 1. Pix Oficial (Verde Pix & Petróleo) */
+        .theme-pix {
+            --theme-primary: #32BCAD;
+            --theme-primary-dark: #0f4d45;
+            --theme-header-bg: linear-gradient(135deg, #0b2230 0%, #103c4c 55%, #32BCAD 100%);
+            --theme-border-color: #32BCAD;
+            --theme-badge-bg: #e6f9f6;
+            --theme-badge-text: #007769;
+            --theme-qr-border: #32BCAD;
+        }
+
+        /* 2. Ouro Nobre / Black & Gold (Luxury) */
+        .theme-gold {
+            --theme-primary: #b48c26;
+            --theme-primary-dark: #785a12;
+            --theme-header-bg: linear-gradient(135deg, #11141a 0%, #1f2736 50%, #7d601b 100%);
+            --theme-border-color: #c99e32;
+            --theme-badge-bg: #fefce8;
+            --theme-badge-text: #854d0e;
+            --theme-qr-border: #c99e32;
+        }
+
+        /* 3. Azul Corporativo (Royal Blue) */
+        .theme-blue {
+            --theme-primary: #2563eb;
+            --theme-primary-dark: #1e3a8a;
+            --theme-header-bg: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+            --theme-border-color: #2563eb;
+            --theme-badge-bg: #eff6ff;
+            --theme-badge-text: #1d4ed8;
+            --theme-qr-border: #2563eb;
+        }
+
+        /* 4. Verde Esmeralda (Health & Bio) */
+        .theme-emerald {
+            --theme-primary: #059669;
+            --theme-primary-dark: #064e3b;
+            --theme-header-bg: linear-gradient(135deg, #04241c 0%, #064e3b 60%, #059669 100%);
+            --theme-border-color: #059669;
+            --theme-badge-bg: #ecfdf5;
+            --theme-badge-text: #047857;
+            --theme-qr-border: #059669;
+        }
+
+        /* 5. Roxo Fintech (Tech & Purple) */
+        .theme-purple {
+            --theme-primary: #7c3aed;
+            --theme-primary-dark: #4c1d95;
+            --theme-header-bg: linear-gradient(135deg, #1c0e35 0%, #4c1d95 60%, #7c3aed 100%);
+            --theme-border-color: #7c3aed;
+            --theme-badge-bg: #f5f3ff;
+            --theme-badge-text: #6d28d9;
+            --theme-qr-border: #7c3aed;
+        }
+
+        /* 6. Vermelho Gourmet (Ruby & Red) */
+        .theme-ruby {
+            --theme-primary: #dc2626;
+            --theme-primary-dark: #7f1d1d;
+            --theme-header-bg: linear-gradient(135deg, #240a0e 0%, #7f1d1d 60%, #dc2626 100%);
+            --theme-border-color: #dc2626;
+            --theme-badge-bg: #fef2f2;
+            --theme-badge-text: #b91c1c;
+            --theme-qr-border: #dc2626;
+        }
+
+        /* 7. Minimalista Editorial (Black & White) */
+        .theme-minimal {
+            --theme-primary: #0f172a;
+            --theme-primary-dark: #020617;
+            --theme-header-bg: linear-gradient(135deg, #090d16 0%, #1e293b 100%);
+            --theme-border-color: #0f172a;
+            --theme-badge-bg: #f1f5f9;
+            --theme-badge-text: #0f172a;
+            --theme-qr-border: #0f172a;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #10b981;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Mobile Viewport Toggle */
+        .mobile-view-toggle {
+            display: none;
+        }
+
+        /* =========================================================
+           PRINT OPTIMIZATION (@media print)
+        ========================================================= */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            html,
+            body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .app-header,
+            .studio-sidebar,
+            .canvas-controls-bar,
+            .toast,
+            .mobile-view-toggle {
+                display: none !important;
+            }
+
+            .workspace-container,
+            .canvas-area {
+                background: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                display: block !important;
+                overflow: visible !important;
+            }
+
+            .sheet-wrapper {
+                transform: none !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .a4-page {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                width: 100% !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                box-sizing: border-box !important;
+            }
+
+            .a4-page.format-display {
+                width: 100% !important;
+                height: 100vh !important;
+            }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1080px) {
+            .workspace-container {
+                flex-direction: column;
+            }
+
+            .studio-sidebar {
+                width: 100%;
+                min-width: 100%;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .canvas-area {
+                padding: 20px 10px 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header Principal -->
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="pix-icon-badge">
+                <svg viewBox="0 0 512 512" width="24" height="24" fill="currentColor">
+                    <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.404 14.765-5.384 20.15 0l76.989 76.989c14.191 14.172 33.045 21.98 53.12 21.98h15.098l-97.138 97.139c-30.326 30.344-79.505 30.344-109.85 0l-97.415-97.416h9.232zm280.068-271.294c-20.056 0-38.929 7.809-53.12 22l-76.97 76.99c-5.551 5.53-14.6 5.568-20.15-.02l-76.711-76.693c-14.192-14.191-33.046-21.999-53.12-21.999h-9.234l97.416-97.416c30.344-30.344 79.523-30.344 109.867 0l97.138 97.138h-15.116z"/>
+                    <path d="M22.758 200.753l58.024-58.024h31.787c13.84 0 27.384 5.605 37.172 15.394l76.694 76.693c7.178 7.179 16.596 10.768 26.033 10.768 9.417 0 18.854-3.59 26.014-10.75l76.989-76.99c9.787-9.787 23.331-15.393 37.171-15.393h37.654l58.3 58.302c30.343 30.344 30.343 79.523 0 109.867l-58.3 58.303H392.64c-13.84 0-27.384-5.605-37.171-15.394l-76.97-76.99c-13.914-13.894-38.172-13.894-52.066.02l-76.694 76.674c-9.788 9.788-23.332 15.413-37.172 15.413H80.782L22.758 310.62c-30.344-30.345-30.344-79.524 0-109.868"/>
+                </svg>
+            </div>
+            <div>
+                <h1>Gerador de Placa Pix Pro</h1>
+                <p>Personalize com nome da empresa, temas e imprima em alta definição</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="carregarExemplo()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                Exemplo
+            </button>
+            <button class="btn btn-secondary" onclick="copiarPixCopiaCola()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copiar Código Pix
+            </button>
+            <button class="btn btn-secondary" onclick="baixarImagem()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Baixar Imagem
+            </button>
+            <button class="btn btn-print" onclick="window.print()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Imprimir Folha A4
+            </button>
+        </div>
+    </header>
+
+    <!-- Workspace Principal -->
+    <div class="workspace-container">
+
+        <!-- Painel de Configurações (Estúdio) -->
+        <aside class="studio-sidebar">
+
+            <!-- 1. Identidade da Empresa -->
+            <div class="section-card">
+                <div class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/><line x1="5" y1="21" x2="5" y2="10.8"/><line x1="19" y1="21" x2="19" y2="10.8"/><line x1="9" y1="21" x2="9" y2="10.8"/><line x1="15" y1="21" x2="15" y2="10.8"/></svg>
+                    1. Nome & Identidade da Empresa
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Nome da Empresa / Estabelecimento
+                    </label>
+                    <input type="text" id="input-empresa" class="form-input" placeholder="Ex: Café & Bistrô Central" value="CONFEITARIA & CAFÉ SILVA" oninput="atualizarPlaca()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Slogan / Mensagem Subtítulo
+                    </label>
+                    <input type="text" id="input-slogan" class="form-input" placeholder="Ex: Qualidade e bom atendimento" value="O melhor sabor todos os dias • Atendimento no Balcão" oninput="atualizarPlaca()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Logotipo da Empresa (Opcional)</label>
+                    <div class="logo-uploader" onclick="document.getElementById('input-logo-file').click()">
+                        <input type="file" id="input-logo-file" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="margin-bottom:4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <div style="font-size:12px; color:#cbd5e1; font-weight:600;">Clique para carregar o Logo da Empresa</div>
+                        <div style="font-size:11px; color:#64748b;">PNG, JPG, SVG ou WebP</div>
+                    </div>
+
+                    <div id="logo-preview-wrapper" class="logo-preview-box" style="display:none;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <img id="logo-preview-thumb" src="" alt="Logo">
+                            <span style="font-size:12px; color:#cbd5e1;">Logotipo carregado</span>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="removerLogo()" style="color:#ef4444; border-color:#7f1d1d;">Remover</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Escolha de Temas & Layout -->
+            <div class="section-card">
+                <div class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+                    2. Escolha o Tema Visual
+                </div>
+
+                <div class="theme-grid">
+                    <!-- Tema Pix Oficial -->
+                    <div class="theme-card active" onclick="selecionarTema('theme-pix', this)">
+                        <div class="theme-card-preview" style="background: linear-gradient(135deg, #0b2230, #32BCAD);"></div>
+                        <div class="theme-name">Pix Oficial</div>
+                        <div class="theme-desc">Turquesa & Petróleo</div>
+                    </div>
+
+                    <!-- Tema Ouro Luxo -->
+                    <div class="theme-card" onclick="selecionarTema('theme-gold', this)">
+                        <div class="theme-card-preview" style="background: linear-gradient(135deg, #11141a, #c99e32);"></div>
+                        <div class="theme-name">Ouro Nobre</div>
+                        <div class="theme-desc">Black & Gold Luxo</div>
+                    </div>
+
+                    <!-- Tema Azul Corporativo -->
+                    <div class="theme-card" onclick="selecionarTema('theme-blue', this)">
+                        <div class="theme-card-preview" style="background: linear-gradient(135deg, #0f172a, #2563eb);"></div>
+                        <div class="theme-name">Corporativo</div>
+                        <div class="theme-desc">Azul Royal Elegante</div>
+                    </div>
+
+                    <!-- Tema Esmeralda -->
+                    <div class="theme-card" onclick="selecionarTema('theme-emerald', this)">
+                        <div class="theme-card-preview" style="background: linear-gradient(135deg, #04241c, #059669);"></div>
+                        <div class="theme-name">Esmeralda</div>
+                        <div class="theme-desc">Verde Saúde & Bio</div>
+                    </div>
+
+                    <!-- Tema Roxo Fintech -->
+                    <div class="theme-card" onclick="selecionarTema('theme-purple', this)">
+                        <div class="theme-card-preview" style="background: linear-gradient(135deg, #1c0e35, #7c3aed);"></div>
+                        <div class="theme-name">Roxo Fintech</div>
+                        <div class="theme-desc">Moderno & Criativo</div>
+                    </div>
+
+                    <!-- Tema Rubro Gourmet -->
+                    <div class="theme-card" onclick="selecionarTema('theme-ruby', this)">
+                        <div class="theme-card-preview" style="background: linear-gradient(135deg, #240a0e, #dc2626);"></div>
+                        <div class="theme-name">Gourmet</div>
+                        <div class="theme-desc">Vermelho Gastronomia</div>
+                    </div>
+
+                    <!-- Tema Minimalista -->
+                    <div class="theme-card" onclick="selecionarTema('theme-minimal', this)">
+                        <div class="theme-card-preview" style="background: linear-gradient(135deg, #090d16, #475569);"></div>
+                        <div class="theme-name">Minimalista</div>
+                        <div class="theme-desc">Preto & Branco Suíço</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 14px;">
+                    <label class="form-label">Tamanho / Formato da Placa</label>
+                    <div class="format-selector">
+                        <div class="format-btn active" onclick="selecionarFormato('a4', this)">
+                            <span>Folha A4 Completa</span>
+                            <small>Para Parede, Porta ou Quadro (210x297mm)</small>
+                        </div>
+                        <div class="format-btn" onclick="selecionarFormato('display', this)">
+                            <span>Display de Balcão</span>
+                            <small>Compacto para Acrílico ou Caixa (A5)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Dados do Pagamento Pix -->
+            <div class="section-card">
+                <div class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    3. Dados da Chave Pix (Banco Central)
+                </div>
+
+                <!-- Tipo de Chave -->
+                <label class="form-label">Tipo de Chave Pix</label>
+                <div class="type-chips">
+                    <div class="type-chip active" onclick="selecionarTipoChave('CNPJ', this)">CNPJ</div>
+                    <div class="type-chip" onclick="selecionarTipoChave('CPF', this)">CPF</div>
+                    <div class="type-chip" onclick="selecionarTipoChave('CELULAR', this)">Celular</div>
+                    <div class="type-chip" onclick="selecionarTipoChave('EMAIL', this)">E-mail</div>
+                    <div class="type-chip" onclick="selecionarTipoChave('ALEATORIA', this)">Aleatória (EVP)</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" id="label-chave">Chave Pix (CNPJ):</label>
+                    <input type="text" id="input-chave" class="form-input" placeholder="00.000.000/0001-00" value="12.345.678/0001-90" oninput="atualizarPlaca()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Nome do Titular da Conta
+                        <span class="char-counter" id="char-counter-nome">0/25 caracteres</span>
+                    </label>
+                    <input type="text" id="input-titular" class="form-input" placeholder="Nome como no banco (máx 25)" value="CONFEITARIA SILVA LTDA" maxlength="25" oninput="atualizarPlaca()">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Cidade do Recebedor
+                            <span class="char-counter" id="char-counter-cidade">0/15</span>
+                        </label>
+                        <input type="text" id="input-cidade" class="form-input" placeholder="Ex: SAO PAULO" value="SAO PAULO" maxlength="15" oninput="atualizarPlaca()">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Valor (Opcional - R$)</label>
+                        <input type="text" id="input-valor" class="form-input" placeholder="Ex: 25,00 ou livre" oninput="formatarEAtualizarValor(this)">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Identificador / TxID (Opcional)</label>
+                    <input type="text" id="input-txid" class="form-input" placeholder="Opcional (padrão ***)" value="***" maxlength="25" oninput="atualizarPlaca()">
+                </div>
+            </div>
+
+            <!-- 4. Opções Adicionais da Folha -->
+            <div class="section-card">
+                <div class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    4. Personalização da Folha
+                </div>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="check-mostrar-passos" checked onchange="atualizarPlaca()">
+                    Exibir guia passo a passo ilustrado
+                </label>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="check-mostrar-chave" checked onchange="atualizarPlaca()">
+                    Exibir chave escrita para digitação manual
+                </label>
+
+                <div class="form-group" style="margin-top:12px;">
+                    <label class="form-label">Frase de Cortesia no Rodapé</label>
+                    <input type="text" id="input-cortesia" class="form-input" value="Agradecemos a sua preferência! Volte sempre." oninput="atualizarPlaca()">
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Área de Pré-Visualização da Folha -->
+        <main class="canvas-area">
+
+            <!-- Barra de Zoom e Controles -->
+            <div class="canvas-controls-bar">
+                <span class="zoom-label">Visualização:</span>
+                <button class="zoom-btn" onclick="definirZoom(0.55, this)">55%</button>
+                <button class="zoom-btn active" onclick="definirZoom(0.75, this)">75%</button>
+                <button class="zoom-btn" onclick="definirZoom(1.0, this)">100% (Tamanho Real)</button>
+                <button class="zoom-btn" onclick="ajustarZoomAutomatico()">Ajustar à Tela</button>
+            </div>
+
+            <!-- Envelope da Folha A4 com Escala -->
+            <div class="sheet-wrapper" id="sheet-wrapper" style="transform: scale(0.75);">
+
+                <!-- Folha A4 / Display -->
+                <div class="a4-page theme-pix" id="folha-pix">
+
+                    <!-- Moldura Decorativa -->
+                    <div class="placa-frame"></div>
+
+                    <!-- Cabeçalho da Empresa -->
+                    <div class="placa-header">
+                        <div class="placa-top-pill">
+                            <svg viewBox="0 0 512 512" width="13" height="13" fill="currentColor">
+                                <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.404 14.765-5.384 20.15 0l76.989 76.989c14.191 14.172 33.045 21.98 53.12 21.98h15.098l-97.138 97.139c-30.326 30.344-79.505 30.344-109.85 0l-97.415-97.416h9.232zm280.068-271.294c-20.056 0-38.929 7.809-53.12 22l-76.97 76.99c-5.551 5.53-14.6 5.568-20.15-.02l-76.711-76.693c-14.192-14.191-33.046-21.999-53.12-21.999h-9.234l97.416-97.416c30.344-30.344 79.523-30.344 109.867 0l97.138 97.138h-15.116z"/>
+                                <path d="M22.758 200.753l58.024-58.024h31.787c13.84 0 27.384 5.605 37.172 15.394l76.694 76.693c7.178 7.179 16.596 10.768 26.033 10.768 9.417 0 18.854-3.59 26.014-10.75l76.989-76.99c9.787-9.787 23.331-15.393 37.171-15.393h37.654l58.3 58.302c30.343 30.344 30.343 79.523 0 109.867l-58.3 58.303H392.64c-13.84 0-27.384-5.605-37.171-15.394l-76.97-76.99c-13.914-13.894-38.172-13.894-52.066.02l-76.694 76.674c-9.788 9.788-23.332 15.413-37.172 15.413H80.782L22.758 310.62c-30.344-30.345-30.344-79.524 0-109.868"/>
+                            </svg>
+                            Pague com Pix • Banco Central do Brasil
+                        </div>
+
+                        <div class="company-header-block">
+                            <img id="placa-empresa-logo" class="company-logo-img" src="" alt="Logo" style="display:none;">
+                            <div class="company-name-text" id="display-empresa">CONFEITARIA & CAFÉ SILVA</div>
+                        </div>
+
+                        <div class="company-slogan-text" id="display-slogan">O melhor sabor todos os dias • Atendimento no Balcão</div>
+                    </div>
+
+                    <!-- Banner de Título Pix -->
+                    <div class="pix-title-banner">
+                        <svg class="pix-logo-svg" viewBox="0 0 512 512" fill="currentColor">
+                            <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.404 14.765-5.384 20.15 0l76.989 76.989c14.191 14.172 33.045 21.98 53.12 21.98h15.098l-97.138 97.139c-30.326 30.344-79.505 30.344-109.85 0l-97.415-97.416h9.232zm280.068-271.294c-20.056 0-38.929 7.809-53.12 22l-76.97 76.99c-5.551 5.53-14.6 5.568-20.15-.02l-76.711-76.693c-14.192-14.191-33.046-21.999-53.12-21.999h-9.234l97.416-97.416c30.344-30.344 79.523-30.344 109.867 0l97.138 97.138h-15.116z"/>
+                            <path d="M22.758 200.753l58.024-58.024h31.787c13.84 0 27.384 5.605 37.172 15.394l76.694 76.693c7.178 7.179 16.596 10.768 26.033 10.768 9.417 0 18.854-3.59 26.014-10.75l76.989-76.99c9.787-9.787 23.331-15.393 37.171-15.393h37.654l58.3 58.302c30.343 30.344 30.343 79.523 0 109.867l-58.3 58.303H392.64c-13.84 0-27.384-5.605-37.171-15.394l-76.97-76.99c-13.914-13.894-38.172-13.894-52.066.02l-76.694 76.674c-9.788 9.788-23.332 15.413-37.172 15.413H80.782L22.758 310.62c-30.344-30.345-30.344-79.524 0-109.868"/>
+                        </svg>
+                        <h2>Pague com Pix</h2>
+                    </div>
+
+                    <div class="pix-subtitle">
+                        Abra o app do seu banco, escolha Pix e aponte a câmera
+                    </div>
+
+                    <!-- QR Code Central -->
+                    <div class="qr-stage">
+                        <div class="qr-outer-card">
+                            <div id="qrcode-canvas-container"></div>
+                            <div class="qr-scan-badge">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                Escaneie com a câmera do celular
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Caixa de Detalhes da Chave Pix -->
+                    <div class="placa-details-card" id="card-detalhes-chave">
+                        <div class="key-type-badge" id="display-badge-tipo">CHAVE CNPJ</div>
+                        <div class="pix-key-display" id="display-chave">12.345.678/0001-90</div>
+                        <div class="recipient-info">
+                            Titular: <span id="display-titular">CONFEITARIA SILVA LTDA</span> • <span id="display-cidade">SAO PAULO</span>
+                        </div>
+                        <div class="valor-info-badge" id="display-valor-badge" style="display:none;">
+                            Valor: <span id="display-valor-texto">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <!-- Passo a Passo (3 Passos) -->
+                    <div class="steps-container" id="container-passos">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-text">Abra o app do seu banco ou carteira</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-text">Escolha a opção Pix e "Ler QR Code"</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-text">Aponte a câmera para o código e confirme</div>
+                        </div>
+                    </div>
+
+                    <!-- Rodapé da Folha -->
+                    <div class="placa-footer">
+                        <div class="footer-courtesy-msg" id="display-cortesia">Agradecemos a sua preferência! Volte sempre.</div>
+                        <div class="security-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Pagamento Instantâneo Seguro • Regulamentado pelo Banco Central do Brasil
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="toast">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="toast-message">Código Pix copiado para a área de transferência!</span>
+    </div>
+
+    <!-- Scripts de Lógica do Pix e da Interface -->
+    <script>
+        let tipoChaveAtual = 'CNPJ';
+        let temaAtual = 'theme-pix';
+        let formatoAtual = 'a4';
+        let logoDataUrl = '';
+        let payloadPixCache = '';
+
+        // Remove acentos e normaliza para o padrão Banco Central EMVCo
+        function removerAcentos(str) {
+            if (!str) return '';
+            return str
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toUpperCase()
+                .trim();
+        }
+
+        // Formata campo no padrão TLV (Tag-Length-Value) EMVCo
+        function formatField(id, value) {
+            const strVal = String(value);
+            const len = strVal.length.toString().padStart(2, '0');
+            return `${id}${len}${strVal}`;
+        }
+
+        // Algoritmo CRC-16/CCITT-FALSE (Padrão Banco Central do Brasil)
+        function calcularCRC16(payload) {
+            let crc = 0xFFFF;
+            for (let i = 0; i < payload.length; i++) {
+                crc ^= payload.charCodeAt(i) << 8;
+                for (let j = 0; j < 8; j++) {
+                    if ((crc & 0x8000) !== 0) {
+                        crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+                    } else {
+                        crc = (crc << 1) & 0xFFFF;
+                    }
+                }
+            }
+            return crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+
+        // Gera o Payload Oficial Pix Copia e Cola
+        function gerarPayloadPix(chave, titular, cidade, valorFormatado, txid) {
+            // Limpa chave se for CPF/CNPJ/Telefone para o QR Code
+            let chaveLimpa = chave.trim();
+            if (tipoChaveAtual === 'CNPJ' || tipoChaveAtual === 'CPF') {
+                chaveLimpa = chaveLimpa.replace(/\D/g, '');
+            } else if (tipoChaveAtual === 'CELULAR') {
+                chaveLimpa = chaveLimpa.replace(/[^\d+]/g, '');
+                if (!chaveLimpa.startsWith('+55') && !chaveLimpa.startsWith('+')) {
+                    chaveLimpa = '+55' + chaveLimpa;
+                }
+            }
+
+            const gui = formatField('00', 'br.gov.bcb.pix');
+            const key = formatField('01', chaveLimpa);
+            const merchantAccount = formatField('26', gui + key);
+
+            // Código da Moeda Brasileira: 986 (Real - ISO 4217)
+            const currency = formatField('53', '986');
+            const countryCode = formatField('58', 'BR');
+            const nomeFormatado = removerAcentos(titular).substring(0, 25) || 'RECEBEDOR';
+            const cidadeFormatada = removerAcentos(cidade).substring(0, 15) || 'SAO PAULO';
+            const merchantName = formatField('59', nomeFormatado);
+            const merchantCity = formatField('60', cidadeFormatada);
+
+            // Campo 54: Valor opcional
+            let amountField = '';
+            if (valorFormatado) {
+                const valorNum = parseFloat(valorFormatado.replace(',', '.'));
+                if (!isNaN(valorNum) && valorNum > 0) {
+                    amountField = formatField('54', valorNum.toFixed(2));
+                }
+            }
+
+            // Campo 62: TxID / Referência
+            const txidVal = (txid && txid.trim()) ? removerAcentos(txid).replace(/[^A-Z0-9]/g, '').substring(0, 25) : '***';
+            const additionalData = formatField('62', formatField('05', txidVal || '***'));
+
+            let payloadSemCRC =
+                formatField('00', '01') +
+                merchantAccount +
+                formatField('52', '0000') +
+                currency +
+                amountField +
+                countryCode +
+                merchantName +
+                merchantCity +
+                additionalData +
+                '6304';
+
+            return payloadSemCRC + calcularCRC16(payloadSemCRC);
+        }
+
+        // Atualiza a visualização em tempo real
+        function atualizarPlaca() {
+            const empresa = document.getElementById('input-empresa').value || 'NOME DA EMPRESA';
+            const slogan = document.getElementById('input-slogan').value || '';
+            const chave = document.getElementById('input-chave').value || '';
+            const titular = document.getElementById('input-titular').value || 'RECEBEDOR';
+            const cidade = document.getElementById('input-cidade').value || 'SAO PAULO';
+            const valor = document.getElementById('input-valor').value || '';
+            const txid = document.getElementById('input-txid').value || '***';
+            const cortesia = document.getElementById('input-cortesia').value || 'Agradecemos a preferência!';
+
+            // Atualiza contadores de caracteres
+            document.getElementById('char-counter-nome').innerText = `${titular.length}/25 caracteres`;
+            document.getElementById('char-counter-cidade').innerText = `${cidade.length}/15`;
+
+            // Atualiza textos na Folha
+            document.getElementById('display-empresa').innerText = empresa.toUpperCase();
+            document.getElementById('display-slogan').innerText = slogan;
+            document.getElementById('display-slogan').style.display = slogan.trim() ? 'block' : 'none';
+
+            document.getElementById('display-badge-tipo').innerText = `CHAVE ${tipoChaveAtual}`;
+            document.getElementById('display-chave').innerText = chave;
+            document.getElementById('display-titular').innerText = titular.toUpperCase();
+            document.getElementById('display-cidade').innerText = cidade.toUpperCase();
+            document.getElementById('display-cortesia').innerText = cortesia;
+
+            // Opção de exibir ou ocultar chave escrita
+            const checkMostrarChave = document.getElementById('check-mostrar-chave').checked;
+            document.getElementById('card-detalhes-chave').style.display = checkMostrarChave ? 'block' : 'none';
+
+            // Opção de exibir ou ocultar passos
+            const checkMostrarPassos = document.getElementById('check-mostrar-passos').checked;
+            document.getElementById('container-passos').style.display = checkMostrarPassos ? 'grid' : 'none';
+
+            // Valor Opcional
+            const badgeValor = document.getElementById('display-valor-badge');
+            if (valor.trim()) {
+                badgeValor.style.display = 'inline-block';
+                document.getElementById('display-valor-texto').innerText = `R$ ${valor.trim()}`;
+            } else {
+                badgeValor.style.display = 'none';
+            }
+
+            // Gera Payload Pix
+            payloadPixCache = gerarPayloadPix(chave, titular, cidade, valor, txid);
+
+            // Renderiza QR Code
+            renderizarQRCode(payloadPixCache);
+        }
+
+        // Renderiza o QR Code com QRCode.js
+        function renderizarQRCode(text) {
+            const container = document.getElementById('qrcode-canvas-container');
+            container.innerHTML = '';
+
+            if (typeof QRCode === 'undefined') {
+                setTimeout(() => renderizarQRCode(text), 250);
+                return;
+            }
+
+            const qrSize = formatoAtual === 'display' ? 240 : 340;
+
+            try {
+                new QRCode(container, {
+                    text: text,
+                    width: qrSize,
+                    height: qrSize,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } catch (e) {
+                console.error("Erro ao gerar QR Code:", e);
+            }
+        }
+
+        // Seleção do Tipo de Chave Pix
+        function selecionarTipoChave(tipo, element) {
+            tipoChaveAtual = tipo;
+            document.querySelectorAll('.type-chip').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            const labelChave = document.getElementById('label-chave');
+            const inputChave = document.getElementById('input-chave');
+
+            labelChave.innerText = `Chave Pix (${tipo}):`;
+
+            if (tipo === 'CNPJ') {
+                inputChave.placeholder = '00.000.000/0001-00';
+                if (!inputChave.value || inputChave.value.includes('@') || inputChave.value.startsWith('+')) {
+                    inputChave.value = '12.345.678/0001-90';
+                }
+            } else if (tipo === 'CPF') {
+                inputChave.placeholder = '000.000.000-00';
+                if (!inputChave.value || inputChave.value.includes('/')) {
+                    inputChave.value = '123.456.789-00';
+                }
+            } else if (tipo === 'CELULAR') {
+                inputChave.placeholder = '(11) 98765-4321';
+                inputChave.value = '(11) 98765-4321';
+            } else if (tipo === 'EMAIL') {
+                inputChave.placeholder = 'financeiro@empresa.com.br';
+                inputChave.value = 'financeiro@empresa.com.br';
+            } else if (tipo === 'ALEATORIA') {
+                inputChave.placeholder = '123e4567-e89b-12d3-a456-426614174000';
+                inputChave.value = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+            }
+
+            atualizarPlaca();
+        }
+
+        // Seleção de Temas
+        function selecionarTema(nomeTema, element) {
+            temaAtual = nomeTema;
+            document.querySelectorAll('.theme-card').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            const folha = document.getElementById('folha-pix');
+            folha.className = `a4-page ${nomeTema} ${formatoAtual === 'display' ? 'format-display' : ''}`;
+        }
+
+        // Seleção de Formato (A4 vs Display)
+        function selecionarFormato(formato, element) {
+            formatoAtual = formato;
+            document.querySelectorAll('.format-btn').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            const folha = document.getElementById('folha-pix');
+            if (formato === 'display') {
+                folha.classList.add('format-display');
+            } else {
+                folha.classList.remove('format-display');
+            }
+
+            atualizarPlaca();
+        }
+
+        // Upload de Logo
+        function handleLogoUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    logoDataUrl = e.target.result;
+                    document.getElementById('placa-empresa-logo').src = logoDataUrl;
+                    document.getElementById('placa-empresa-logo').style.display = 'block';
+
+                    document.getElementById('logo-preview-thumb').src = logoDataUrl;
+                    document.getElementById('logo-preview-wrapper').style.display = 'flex';
+                    showToast('Logotipo adicionado à placa com sucesso!');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Remover Logo
+        function removerLogo() {
+            logoDataUrl = '';
+            document.getElementById('input-logo-file').value = '';
+            document.getElementById('placa-empresa-logo').style.display = 'none';
+            document.getElementById('placa-empresa-logo').src = '';
+            document.getElementById('logo-preview-wrapper').style.display = 'none';
+            showToast('Logotipo removido.');
+        }
+
+        // Formatação de Valor
+        function formatarEAtualizarValor(input) {
+            let val = input.value.replace(/\D/g, '');
+            if (!val) {
+                input.value = '';
+                atualizarPlaca();
+                return;
+            }
+            let num = (parseInt(val, 10) / 100).toFixed(2);
+            input.value = num.replace('.', ',');
+            atualizarPlaca();
+        }
+
+        // Copiar Código Pix Copia e Cola
+        function copiarPixCopiaCola() {
+            if (!payloadPixCache) {
+                atualizarPlaca();
+            }
+            navigator.clipboard.writeText(payloadPixCache).then(() => {
+                showToast('Código Pix (Copia e Cola) copiado!');
+            }).catch(err => {
+                const inputTemp = document.createElement('textarea');
+                inputTemp.value = payloadPixCache;
+                document.body.appendChild(inputTemp);
+                inputTemp.select();
+                document.execCommand('copy');
+                document.body.removeChild(inputTemp);
+                showToast('Código Pix copiado!');
+            });
+        }
+
+        // Baixar Placa como Imagem PNG (html2canvas)
+        function baixarImagem() {
+            showToast('Gerando imagem em alta resolução...');
+            const folha = document.getElementById('folha-pix');
+            const wrapper = document.getElementById('sheet-wrapper');
+
+            const currentTransform = wrapper.style.transform;
+            wrapper.style.transform = 'scale(1)';
+
+            html2canvas(folha, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                wrapper.style.transform = currentTransform;
+                const link = document.createElement('a');
+                const nomeEmpresa = (document.getElementById('input-empresa').value || 'placa-pix')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]/g, '-');
+                link.download = `placa-pix-${nomeEmpresa}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('Download da imagem concluído!');
+            }).catch(err => {
+                wrapper.style.transform = currentTransform;
+                console.error(err);
+                alert('Dica: Para salvar com máxima fidelidade, você também pode usar o botão "Imprimir Folha A4" e escolher "Salvar como PDF"!');
+            });
+        }
+
+        // Exibir Notificação Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast-notification');
+            const msgEl = document.getElementById('toast-message');
+            msgEl.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
+        // Ajustes de Zoom da Folha na tela
+        function definirZoom(scale, btn) {
+            document.querySelectorAll('.zoom-btn').forEach(el => el.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            document.getElementById('sheet-wrapper').style.transform = `scale(${scale})`;
+        }
+
+        function ajustarZoomAutomatico() {
+            const canvasWidth = document.querySelector('.canvas-area').clientWidth;
+            // Largura da folha A4 em px aprox: 210mm ~ 794px
+            const folhaWidth = formatoAtual === 'display' ? 560 : 794;
+            const availableWidth = canvasWidth - 40;
+            let ratio = availableWidth / folhaWidth;
+            if (ratio > 1) ratio = 1;
+            if (ratio < 0.4) ratio = 0.4;
+            definirZoom(ratio.toFixed(2));
+        }
+
+        // Carregar Exemplo Demonstrativo
+        function carregarExemplo() {
+            document.getElementById('input-empresa').value = 'EMPÓRIO DAS ARTES & CAFÉ';
+            document.getElementById('input-slogan').value = 'Ambiente Aconchegante • Desde 2016';
+            document.getElementById('input-titular').value = 'EMPORIO DAS ARTES LTDA';
+            document.getElementById('input-cidade').value = 'CURITIBA';
+            document.getElementById('input-chave').value = '18.945.123/0001-44';
+            document.getElementById('input-valor').value = '';
+            document.getElementById('input-cortesia').value = 'Obrigado pela sua visita! Volte sempre.';
+
+            selecionarTipoChave('CNPJ', document.querySelectorAll('.type-chip')[0]);
+            selecionarTema('theme-pix', document.querySelectorAll('.theme-card')[0]);
+
+            atualizarPlaca();
+            showToast('Dados de exemplo carregados com sucesso!');
+        }
+
+        window.onload = function () {
+            atualizarPlaca();
+            window.addEventListener('resize', () => {
+                if (window.innerWidth < 1080) {
+                    ajustarZoomAutomatico();
+                }
+            });
+        };
+    </script>
+</body>
+
+</html>
