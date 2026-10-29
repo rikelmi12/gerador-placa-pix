@@ -191,13 +191,25 @@
         /* Preview Canvas */
         .canvas-area {
             flex: 1;
+            min-width: 0;
             background: radial-gradient(circle at 50% 20%, #152238 0%, #080d16 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 30px 20px 60px;
             overflow-y: auto;
+            overflow-x: hidden;
             position: relative;
+        }
+
+        .canvas-area.capturing-export {
+            overflow: visible !important;
+            align-items: flex-start !important;
+        }
+
+        .canvas-area.capturing-export .sheet-wrapper {
+            transform: none !important;
+            margin-bottom: 0 !important;
         }
 
         .canvas-controls-bar {
@@ -1079,8 +1091,20 @@
             pointer-events: auto;
         }
 
-        /* Mobile Viewport Toggle */
+        /* Mobile Viewport Toggle & Bottom Bar (Hidden on Desktop) */
         .mobile-view-toggle {
+            display: none;
+        }
+
+        .mobile-bottom-bar {
+            display: none;
+        }
+
+        .mobile-preview-cta {
+            display: none;
+        }
+
+        .mobile-back-edit-btn {
             display: none;
         }
 
@@ -1109,7 +1133,10 @@
             .studio-sidebar,
             .canvas-controls-bar,
             .toast,
-            .mobile-view-toggle {
+            .mobile-view-toggle,
+            .mobile-bottom-bar,
+            .mobile-preview-cta,
+            .mobile-back-edit-btn {
                 display: none !important;
             }
 
@@ -1149,10 +1176,73 @@
             }
         }
 
-        /* Responsive Breakpoints */
+        /* =========================================================
+           RESPONSIVE & MOBILE EXPERIENCE (<= 1080px)
+        ========================================================= */
         @media (max-width: 1080px) {
+            .app-header {
+                padding: 12px 18px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            /* Sticky Mobile Segmented Tab Bar */
+            .mobile-view-toggle {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                background: rgba(13, 19, 33, 0.96);
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--border-color);
+                padding: 8px 14px;
+                position: sticky;
+                top: 61px;
+                z-index: 95;
+            }
+
+            .mobile-tab-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 12px;
+                border-radius: 10px;
+                border: 1px solid #26354d;
+                background: #162033;
+                color: #94a3b8;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .mobile-tab-btn.active {
+                background: linear-gradient(135deg, rgba(50, 188, 173, 0.2), rgba(37, 99, 235, 0.2));
+                border-color: var(--primary-accent);
+                color: #ffffff;
+                box-shadow: 0 2px 10px rgba(50, 188, 173, 0.18);
+            }
+
+            .mobile-tab-btn .live-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: var(--primary-accent);
+                box-shadow: 0 0 8px var(--primary-accent);
+            }
+
             .workspace-container {
                 flex-direction: column;
+                min-height: auto;
+            }
+
+            /* Toggle behavior when user clicks "Ver Placa" tab */
+            .workspace-container.mobile-preview-mode .studio-sidebar {
+                display: none;
+            }
+
+            .workspace-container.mobile-preview-mode .mobile-back-edit-btn {
+                display: inline-flex;
             }
 
             .studio-sidebar {
@@ -1161,10 +1251,200 @@
                 max-height: none;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
+                padding: 16px 14px 24px;
+            }
+
+            .mobile-preview-cta {
+                display: flex;
+                width: 100%;
+                padding: 14px 18px;
+                font-size: 15px;
+                border-radius: 12px;
+                margin-top: 4px;
+            }
+
+            .mobile-back-edit-btn {
+                margin-bottom: 14px;
+                background: rgba(30, 41, 59, 0.9);
+                border: 1px solid #475569;
+                color: #f8fafc;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+                align-items: center;
+                gap: 6px;
+                cursor: pointer;
             }
 
             .canvas-area {
-                padding: 20px 10px 40px;
+                width: 100%;
+                max-width: 100vw;
+                padding: 20px 10px 44px;
+                overflow-x: hidden;
+            }
+
+            .type-chip:last-child:nth-child(5) {
+                grid-column: span 2;
+            }
+
+            .theme-card:last-child:nth-child(odd) {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 84px;
+            }
+
+            .app-header {
+                padding: 10px 14px;
+                flex-wrap: nowrap;
+            }
+
+            .header-brand {
+                gap: 10px;
+                min-width: 0;
+            }
+
+            .header-brand .pix-icon-badge {
+                width: 34px;
+                height: 34px;
+                min-width: 34px;
+                border-radius: 8px;
+            }
+
+            .header-brand .pix-icon-badge svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .header-brand h1 {
+                font-size: 16px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .header-brand p {
+                display: none;
+            }
+
+            /* Keep only the "Exemplo" quick button in top header; main actions move to Sticky Bottom Bar */
+            .header-actions .btn:not(.btn-exemplo) {
+                display: none;
+            }
+
+            .header-actions .btn-exemplo {
+                padding: 7px 11px;
+                font-size: 12px;
+                border-radius: 8px;
+            }
+
+            .mobile-view-toggle {
+                top: 55px;
+                padding: 7px 12px;
+            }
+
+            .section-card {
+                padding: 14px;
+                margin-bottom: 14px;
+            }
+
+            .section-title {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
+            /* 16px prevents iOS Safari from auto-zooming on input focus */
+            .form-input,
+            .form-select {
+                font-size: 16px;
+                padding: 11px 12px;
+            }
+
+            .type-chip {
+                padding: 10px 6px;
+                font-size: 12.5px;
+            }
+
+            .canvas-controls-bar {
+                width: calc(100% - 8px);
+                max-width: 420px;
+                padding: 7px 10px;
+                border-radius: 14px;
+                gap: 6px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-bottom: 16px;
+            }
+
+            .zoom-label {
+                font-size: 11.5px;
+            }
+
+            .zoom-btn {
+                padding: 5px 9px;
+                font-size: 11.5px;
+            }
+
+            /* Sticky Bottom Action Bar for Thumb Ergonomics */
+            .mobile-bottom-bar {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1.15fr;
+                gap: 8px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(11, 15, 25, 0.95);
+                backdrop-filter: blur(16px);
+                border-top: 1px solid #26354d;
+                padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+                z-index: 200;
+                box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.5);
+            }
+
+            .mobile-bottom-bar .btn {
+                padding: 11px 8px;
+                font-size: 12.5px;
+                border-radius: 10px;
+                gap: 6px;
+                width: 100%;
+            }
+
+            .toast {
+                bottom: 82px;
+                left: 14px;
+                right: 14px;
+                font-size: 13px;
+                padding: 11px 16px;
+                justify-content: center;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-row {
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .format-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .format-btn {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                text-align: left;
+                padding: 11px 14px;
+            }
+
+            .zoom-label {
+                display: none;
             }
         }
     </style>
@@ -1188,7 +1468,7 @@
         </div>
 
         <div class="header-actions">
-            <button class="btn btn-secondary" onclick="carregarExemplo()">
+            <button class="btn btn-secondary btn-exemplo" onclick="carregarExemplo()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
                 Exemplo
             </button>
@@ -1207,8 +1487,20 @@
         </div>
     </header>
 
+    <!-- Barra Alternadora Mobile / Tablet (Editar vs Visualizar Placa) -->
+    <nav class="mobile-view-toggle" aria-label="Alternar visualização no celular">
+        <button type="button" class="mobile-tab-btn active" id="tab-mobile-editar" onclick="alternarModoMobile('editar')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Editar Dados
+        </button>
+        <button type="button" class="mobile-tab-btn" id="tab-mobile-preview" onclick="alternarModoMobile('preview')">
+            <span class="live-dot"></span>
+            Ver Placa Pronta
+        </button>
+    </nav>
+
     <!-- Workspace Principal -->
-    <div class="workspace-container">
+    <div class="workspace-container" id="workspace-container">
 
         <!-- Painel de Configurações (Estúdio) -->
         <aside class="studio-sidebar">
@@ -1400,18 +1692,30 @@
                 </div>
             </div>
 
+            <!-- Botão Rápido Mobile para ir direto à Placa Pronta -->
+            <button type="button" class="btn btn-primary mobile-preview-cta" onclick="alternarModoMobile('preview')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Ver Placa Pronta em Tela Cheia
+            </button>
+
         </aside>
 
         <!-- Área de Pré-Visualização da Folha -->
-        <main class="canvas-area">
+        <main class="canvas-area" id="canvas-area">
+
+            <!-- Botão Voltar para Edição (Exibido no modo Preview Mobile) -->
+            <button type="button" class="mobile-back-edit-btn" onclick="alternarModoMobile('editar')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Voltar para Edição dos Dados
+            </button>
 
             <!-- Barra de Zoom e Controles -->
             <div class="canvas-controls-bar">
                 <span class="zoom-label">Visualização:</span>
                 <button class="zoom-btn" onclick="definirZoom(0.55, this)">55%</button>
                 <button class="zoom-btn active" onclick="definirZoom(0.75, this)">75%</button>
-                <button class="zoom-btn" onclick="definirZoom(1.0, this)">100% (Tamanho Real)</button>
-                <button class="zoom-btn" onclick="ajustarZoomAutomatico()">Ajustar à Tela</button>
+                <button class="zoom-btn" onclick="definirZoom(1.0, this)">100%</button>
+                <button class="zoom-btn" id="btn-zoom-auto" onclick="ajustarZoomAutomatico(this)">Ajustar à Tela</button>
             </div>
 
             <!-- Envelope da Folha A4 com Escala -->
@@ -1507,6 +1811,22 @@
 
         </main>
 
+    </div>
+
+    <!-- Barra Fixa Inferior para Mobile (Ações Rápidas) -->
+    <div class="mobile-bottom-bar">
+        <button type="button" class="btn btn-secondary" onclick="copiarPixCopiaCola()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar Pix
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="baixarImagem()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Baixar PNG
+        </button>
+        <button type="button" class="btn btn-print" onclick="window.print()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Imprimir / PDF
+        </button>
     </div>
 
     <!-- Toast Notification -->
@@ -1744,6 +2064,9 @@
             }
 
             atualizarPlaca();
+            if (window.innerWidth <= 1080) {
+                ajustarZoomAutomatico();
+            }
         }
 
         // Upload de Logo
@@ -1809,17 +2132,26 @@
             showToast('Gerando imagem em alta resolução...');
             const folha = document.getElementById('folha-pix');
             const wrapper = document.getElementById('sheet-wrapper');
+            const canvasArea = document.getElementById('canvas-area');
 
             const currentTransform = wrapper.style.transform;
+            const currentMarginBottom = wrapper.style.marginBottom;
+
+            canvasArea.classList.add('capturing-export');
             wrapper.style.transform = 'scale(1)';
+            wrapper.style.marginBottom = '0px';
 
             html2canvas(folha, {
                 scale: 2,
                 useCORS: true,
                 allowTaint: true,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                scrollX: 0,
+                scrollY: -window.scrollY
             }).then(canvas => {
+                canvasArea.classList.remove('capturing-export');
                 wrapper.style.transform = currentTransform;
+                wrapper.style.marginBottom = currentMarginBottom;
                 const link = document.createElement('a');
                 const nomeEmpresa = (document.getElementById('input-empresa').value || 'placa-pix')
                     .toLowerCase()
@@ -1829,9 +2161,11 @@
                 link.click();
                 showToast('Download da imagem concluído!');
             }).catch(err => {
+                canvasArea.classList.remove('capturing-export');
                 wrapper.style.transform = currentTransform;
+                wrapper.style.marginBottom = currentMarginBottom;
                 console.error(err);
-                alert('Dica: Para salvar com máxima fidelidade, você também pode usar o botão "Imprimir Folha A4" e escolher "Salvar como PDF"!');
+                alert('Dica: Para salvar com máxima fidelidade, você também pode usar o botão "Imprimir / PDF" e escolher "Salvar como PDF"!');
             });
         }
 
@@ -1846,22 +2180,64 @@
             }, 3500);
         }
 
-        // Ajustes de Zoom da Folha na tela
-        function definirZoom(scale, btn) {
-            document.querySelectorAll('.zoom-btn').forEach(el => el.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            document.getElementById('sheet-wrapper').style.transform = `scale(${scale})`;
+        // Alternar modo no Mobile (Editar Dados vs Ver Placa Pronta)
+        function alternarModoMobile(modo) {
+            const workspace = document.getElementById('workspace-container');
+            const tabEditar = document.getElementById('tab-mobile-editar');
+            const tabPreview = document.getElementById('tab-mobile-preview');
+
+            if (modo === 'preview') {
+                workspace.classList.add('mobile-preview-mode');
+                tabEditar.classList.remove('active');
+                tabPreview.classList.add('active');
+                setTimeout(() => {
+                    ajustarZoomAutomatico();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 30);
+            } else {
+                workspace.classList.remove('mobile-preview-mode');
+                tabPreview.classList.remove('active');
+                tabEditar.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
-        function ajustarZoomAutomatico() {
-            const canvasWidth = document.querySelector('.canvas-area').clientWidth;
-            // Largura da folha A4 em px aprox: 210mm ~ 794px
-            const folhaWidth = formatoAtual === 'display' ? 560 : 794;
-            const availableWidth = canvasWidth - 40;
+        // Ajustes de Zoom da Folha na tela (remove espaço morto vertical em escalas menores)
+        function definirZoom(scale, btn) {
+            const numScale = parseFloat(scale);
+            document.querySelectorAll('.zoom-btn').forEach(el => el.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            const wrapper = document.getElementById('sheet-wrapper');
+            const folha = document.getElementById('folha-pix');
+            wrapper.style.transform = `scale(${numScale})`;
+
+            const unscaledHeight = folha.offsetHeight || (formatoAtual === 'display' ? 794 : 1123);
+            if (numScale < 1) {
+                const deadSpace = Math.round(unscaledHeight * (1 - numScale));
+                wrapper.style.marginBottom = `-${deadSpace}px`;
+            } else {
+                wrapper.style.marginBottom = '0px';
+            }
+        }
+
+        function ajustarZoomAutomatico(btn) {
+            const canvasArea = document.querySelector('.canvas-area');
+            const folha = document.getElementById('folha-pix');
+            const viewportW = window.innerWidth;
+            const containerW = canvasArea ? Math.min(viewportW, canvasArea.clientWidth || viewportW) : viewportW;
+
+            // Largura real da folha A4 (~794px) ou Display (~560px)
+            const folhaWidth = folha.offsetWidth || (formatoAtual === 'display' ? 560 : 794);
+            const sidePadding = viewportW <= 768 ? 20 : 40;
+            const availableWidth = containerW - sidePadding;
+
             let ratio = availableWidth / folhaWidth;
             if (ratio > 1) ratio = 1;
-            if (ratio < 0.4) ratio = 0.4;
-            definirZoom(ratio.toFixed(2));
+            if (ratio < 0.32) ratio = 0.32;
+
+            const autoBtn = btn || document.getElementById('btn-zoom-auto');
+            definirZoom(ratio.toFixed(2), autoBtn);
         }
 
         // Carregar Exemplo Demonstrativo
@@ -1883,8 +2259,13 @@
 
         window.onload = function () {
             atualizarPlaca();
+            if (window.innerWidth <= 1080) {
+                ajustarZoomAutomatico();
+            } else {
+                definirZoom(0.75, document.querySelectorAll('.zoom-btn')[1]);
+            }
             window.addEventListener('resize', () => {
-                if (window.innerWidth < 1080) {
+                if (window.innerWidth <= 1080) {
                     ajustarZoomAutomatico();
                 }
             });
